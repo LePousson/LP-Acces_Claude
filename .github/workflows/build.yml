@@ -1,0 +1,76 @@
+# Compile LP-AccesClaude.exe sur Windows, lance les tests, signe avec SignPath (si configuré)
+# et publie une release GitHub quand on pousse une étiquette « v1.2.3 ».
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # pour créer la release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tests
+        shell: cmd
+        run: test.cmd
+
+      - name: Compilation
+        shell: cmd
+        run: build.cmd
+
+      - name: Exe non signé
+        id: upload-unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: LP-AccesClaude-non-signe
+          path: dist/LP-AccesClaude.exe
+          if-no-files-found: error
+
+      # Signature gratuite SignPath Foundation : actif seulement quand le secret SIGNPATH_API_TOKEN
+      # et les variables SIGNPATH_* sont renseignés dans Settings → Secrets and variables → Actions.
+      - name: Signature (SignPath)
+        if: env.SIGNPATH_API_TOKEN != ''
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed
+
+      - name: Paquet
+        shell: pwsh
+        run: |
+          $exe = if (Test-Path signed/LP-AccesClaude.exe) { 'signed/LP-AccesClaude.exe' } else { 'dist/LP-AccesClaude.exe' }
+          $ver = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { "dev-$($env:GITHUB_SHA.Substring(0,7))" }
+          $dir = "LP-AccesClaude-$ver"
+          New-Item -ItemType Directory $dir | Out-Null
+          Copy-Item $exe, README.md, LICENSE $dir
+          Compress-Archive -Path $dir -DestinationPath "$dir.zip"
+          "ZIP=$dir.zip" | Out-File -Append $env:GITHUB_ENV
+          if (Test-Path signed/LP-AccesClaude.exe) { 'Exe signé par SignPath.' } else { 'Exe non signé (SignPath pas encore configuré).' }
+
+      - name: Paquet (artefact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: LP-AccesClaude
+          path: ${{ env.ZIP }}
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP }}
+          generate_release_notes: true
