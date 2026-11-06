@@ -74,3 +74,8 @@ jobs:
         with:
           files: ${{ env.ZIP }}
           generate_release_notes: true
+          body: |
+            Outil Windows non officiel pour lister et retirer les dossiers de ton PC partagés avec des chats Claude Desktop.
+            Unofficial Windows tool to list and revoke the PC folders shared with Claude Desktop chats.
+
+            [Code signing policy](https://github.com/${{ github.repository }}#code-signing-policy)

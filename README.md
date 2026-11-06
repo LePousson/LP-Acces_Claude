@@ -35,13 +35,20 @@ Code en C# 5 / WinForms (.NET Framework 4.8), sans dépendance. Sous Windows, sa
 
 Chaque version publiée est compilée par GitHub Actions à partir de ce dépôt (`.github/workflows/build.yml`).
 
-## Politique de signature du code
+## Code signing policy
 
-Les versions publiées sont destinées à être signées gratuitement par [SignPath.io](https://about.signpath.io/), certificat fourni par la [SignPath Foundation](https://signpath.org/).
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+*Signature de code gratuite fournie par SignPath.io, certificat de la SignPath Foundation.*
 
-- Auteur et approbateur des signatures : LePousson (propriétaire du dépôt).
-- Seuls les binaires compilés par le workflow GitHub Actions de ce dépôt, à partir de son code public, sont signés.
-- Confidentialité : l'application ne transmet aucune donnée. Elle ne fait aucun accès réseau, à part l'ouverture d'un lien de chat dans ton navigateur quand tu cliques dessus.
+**Team roles / Rôles**
+- Committers and reviewers / Auteurs et relecteurs : [LePousson](https://github.com/LePousson) (owner, [members](https://github.com/LePousson/LP-Acces_Claude/graphs/contributors))
+- Approvers / Approbateurs : [LePousson](https://github.com/LePousson)
+
+Only binaries built by this repository's GitHub Actions workflow from its public source code are signed. Every release is approved manually before signing.
+*Seuls les binaires compilés par le workflow GitHub Actions de ce dépôt, à partir de son code public, sont signés. Chaque version est approuvée à la main avant signature.*
+
+**Privacy policy / Confidentialité** : this program will not transfer any information to other networked systems unless specifically requested by the user (clicking a chat link opens it in the browser).
+*Ce programme ne transmet aucune information à d'autres systèmes en réseau, sauf demande explicite de l'utilisateur (cliquer sur un lien de chat l'ouvre dans le navigateur).*
 
 ---
 
