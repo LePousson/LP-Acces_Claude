@@ -95,6 +95,29 @@ static class Tests
         re5.Remove(new Grant[0], new string[0]); re5.Save();
         Check(File.ReadAllText(file).Contains("\"a\": 1"), "configuration sans accès : inchangée");
 
+        Console.WriteLine("Clés rangées dans « preferences » (format réel de Claude Desktop) :");
+        File.WriteAllText(file, @"{
+  ""mcpServers"": { ""ha"": { ""command"": ""x"", ""env"": { ""TOKEN"": ""secret"" } } },
+  ""preferences"": {
+    ""launchPreviewAllowedOrigins"": [ ""https://amazon.fr"" ],
+    ""remoteFolderConsentMemory"": [],
+    ""remoteChatFolderGrants"": {
+      ""cbe60f45-1adf-4174-9459-11356fb335f4"": { ""orgUuid"": ""o"", ""accountUuid"": ""a"", ""folders"": [ ""C:\\HAOS\\_test"" ] }
+    },
+    ""sidebarMode"": ""chat""
+  }
+}", new UTF8Encoding(false));
+        var p1 = new ConfigStore(file); p1.Load();
+        Check(p1.Grants().Count == 1 && p1.Grants()[0].Folder == "C:\\HAOS\\_test", "accès trouvé dans preferences");
+        Check(p1.Where(ConfigStore.GrantsKey) == "preferences › remoteChatFolderGrants", "emplacement indiqué : " + p1.Where(ConfigStore.GrantsKey));
+        p1.Remove(p1.Grants(), null); p1.Save();
+        var p2 = new ConfigStore(file); p2.Load();
+        string sp = File.ReadAllText(file);
+        Check(p2.Grants().Count == 0 && sp.Contains("\"remoteChatFolderGrants\": {}"), "accès retiré dans preferences");
+        Check(sp.Contains("\"TOKEN\": \"secret\"") && sp.Contains("\"sidebarMode\": \"chat\"") && !sp.Contains("\"remoteChatFolderGrants\": {},\n  \"mcpServers\""), "reste du fichier intact, rien ajouté à la racine");
+        var root = (JObject)Json.Parse(sp);
+        Check(!root.Has(ConfigStore.GrantsKey), "aucune clé créée à la racine");
+
         Console.WriteLine("Chemins Claude Desktop :");
         Check(ClaudeDesktop.IsDesktopPath(@"C:\Users\x\AppData\Local\AnthropicClaude\app-1.2.3\claude.exe"), "installation classique");
         Check(ClaudeDesktop.IsDesktopPath(@"C:\Program Files\WindowsApps\Claude_1.0.0_x64__abc\app\Claude.exe"), "Microsoft Store");

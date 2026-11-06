@@ -9,15 +9,15 @@ using System.Windows.Forms;
 [assembly: AssemblyCompany("LePousson")]
 [assembly: AssemblyProduct("LP Accès Claude")]
 [assembly: AssemblyCopyright("LePousson 2026 · non affilié à Anthropic")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 [assembly: ComVisible(false)]
 
 namespace LpAccesClaude
 {
     public static class Program
     {
-        public const string Version = "1.0.0";
+        public const string Version = "1.0.1";
 
         [DllImport("user32.dll")]
         static extern bool SetProcessDPIAware();

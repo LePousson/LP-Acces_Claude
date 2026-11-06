@@ -54,6 +54,7 @@ namespace LpAccesClaude
             { "failed_restored",  new[] { "Échec : {0}\n\nLa sauvegarde a été remise en place, rien n'a changé.", "Failed: {0}\n\nThe backup was put back, nothing changed." } },
             { "log_start",        new[] { "Fichier : {0}", "File: {0}" } },
             { "log_loaded",       new[] { "{0} accès et {1} accord(s) mémorisé(s) trouvés.", "Found {0} grant(s) and {1} remembered consent(s)." } },
+            { "log_where",        new[] { "Emplacement des accès dans le fichier : {0}", "Grants location in the file: {0}" } },
             { "log_closing",      new[] { "Fermeture de Claude Desktop…", "Closing Claude Desktop…" } },
             { "log_force",        new[] { "Claude Desktop reste ouvert (icône près de l'horloge) : arrêt forcé.", "Claude Desktop stays open (tray icon): forcing it to quit." } },
             { "log_closed",       new[] { "Claude Desktop est fermé.", "Claude Desktop is closed." } },

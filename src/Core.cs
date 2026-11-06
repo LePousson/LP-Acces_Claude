@@ -68,10 +68,58 @@ namespace LpAccesClaude
             Root = root;
         }
 
+        /// <summary>
+        /// Objet qui contient la clé demandée : à la racine ou plus bas (Claude Desktop range ses réglages
+        /// dans « preferences »). Recherche en largeur : le plus haut niveau gagne.
+        /// </summary>
+        public JObject FindOwner(string key)
+        {
+            if (Root == null) return null;
+            var queue = new Queue<JObject>();
+            queue.Enqueue(Root);
+            while (queue.Count > 0)
+            {
+                var o = queue.Dequeue();
+                if (o.Has(key)) return o;
+                foreach (var kv in o.Items)
+                {
+                    var child = kv.Value as JObject;
+                    if (child != null) queue.Enqueue(child);
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Chemin lisible de la clé dans le fichier (ex. « preferences › remoteChatFolderGrants »).</summary>
+        public string Where(string key)
+        {
+            var path = new List<string>();
+            return FindPath(Root, key, path) ? string.Join(" › ", path) : null;
+        }
+
+        private static bool FindPath(JObject o, string key, List<string> path)
+        {
+            if (o == null) return false;
+            if (o.Has(key)) { path.Add(key); return true; }
+            foreach (var kv in o.Items)
+            {
+                var child = kv.Value as JObject;
+                if (child == null) continue;
+                path.Add(kv.Key);
+                if (FindPath(child, key, path)) return true;
+                path.RemoveAt(path.Count - 1);
+            }
+            return false;
+        }
+
+        private JObject GrantsObject() { var owner = FindOwner(GrantsKey); return owner == null ? null : owner.Get(GrantsKey) as JObject; }
+
+        private JArray ConsentArray() { var owner = FindOwner(ConsentKey); return owner == null ? null : owner.Get(ConsentKey) as JArray; }
+
         public List<Grant> Grants()
         {
             var list = new List<Grant>();
-            var grants = Root == null ? null : Root.Get(GrantsKey) as JObject;
+            var grants = GrantsObject();
             if (grants == null) return list;
             foreach (var chat in grants.Items)
             {
@@ -90,7 +138,7 @@ namespace LpAccesClaude
         public List<string> Consents()
         {
             var list = new List<string>();
-            var mem = Root == null ? null : Root.Get(ConsentKey) as JArray;
+            var mem = ConsentArray();
             if (mem == null) return list;
             foreach (var f in mem.Items)
             {
@@ -103,7 +151,7 @@ namespace LpAccesClaude
         /// <summary>Retire des accès (chat, dossier) et oublie des accords mémorisés. Un chat sans dossier est retiré.</summary>
         public void Remove(IEnumerable<Grant> remove, IEnumerable<string> forget)
         {
-            var grants = Root.Get(GrantsKey) as JObject;
+            var grants = GrantsObject();
             if (grants != null && remove != null)
             {
                 foreach (var g in remove)
@@ -115,7 +163,7 @@ namespace LpAccesClaude
                     if (folders == null || folders.Items.Count == 0) grants.Remove(g.Chat);
                 }
             }
-            var mem = Root.Get(ConsentKey) as JArray;
+            var mem = ConsentArray();
             if (mem != null && forget != null)
             {
                 var set = new HashSet<string>(forget, StringComparer.Ordinal);

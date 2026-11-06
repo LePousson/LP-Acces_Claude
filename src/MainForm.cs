@@ -331,7 +331,12 @@ namespace LpAccesClaude
             grants = store.Grants();
             consents = store.Consents();
             FillGrids();
-            if (log) Log(Lang.T("log_loaded", grants.Count, consents.Count));
+            if (log)
+            {
+                Log(Lang.T("log_loaded", grants.Count, consents.Count));
+                string where = store.Where(ConfigStore.GrantsKey);
+                if (where != null) Log(Lang.T("log_where", where));
+            }
             return true;
         }
 
